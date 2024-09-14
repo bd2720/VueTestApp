@@ -1,55 +1,71 @@
 <!-- JS goes here -->
 <script setup>
-  import { ref } from 'vue'
-
-  // current number value
-  const num = ref(undefined)
-  // old number (stored when operation chosen)
-  var oldNum = undefined
-  // all operations
-  const operations = ['+', '-', 'x', '÷']
+  import { ref, computed } from 'vue'
+  // first operand
+  let n1 = ref(0)
   // current operation
   var currOp = undefined
+  // second operand
+  let n2 = ref(undefined)
+  // all operations
+  const operations = ['+', '-', 'x', '÷']
 
-  // add digit to num
+  // whether entering n2 or not
+  const second = ref(false)
+
+  // displayed number
+  const nDisplayed = computed(() => {
+    if(second.value && n2.value != undefined) {
+      return n2.value
+    }
+    return n1.value
+  })
+
+  // try to add digit to num
   function addDigit(i) {
-    num.value = (num.value == undefined) ? i : num.value*10 + i
+    if(second.value){
+      n2.value = (n2.value == undefined) ? i : 10*n2.value + i
+    } else {
+      n1.value = 10 * n1.value + i
+    }
   }
   // choose operation
   function chooseOp(op){
     // set operation
     currOp = op
-    // save num
-    oldNum = num.value
-    // clear num
-    clear()
+    // now we need n2
+    second.value = true
+    // set n2 value undefined
+    n2.value = undefined
   }
   // evaluate oldNum `op` num
   function evaluate(){
+    // stop inputting n2
+    second.value = false
+    // evaluate based on operation
     switch(currOp){
       case '+':
-        num.value = oldNum + num.value
+        n1.value += n2.value
         break
       case '-':
-        num.value = oldNum - num.value
+        n1.value -= n2.value
         break
       case 'x':
-        num.value = oldNum * num.value
-      break
+        n1.value *= n2.value
+        break
       case '÷':
-        num.value = oldNum / num.value
+        n1.value /= n2.value
         break
       default:
-        num.value = undefined
+        n1.value = 'Error'
     }
   }
   // reset num, keeping history (oldNum)
   function clear() {
-    num.value = null
   }
-  // reset num and history (oldNum)
+  // reset n1 and n2
   function reset() {
-    num.value = oldNum = undefined
+    n1.value = n2.value = 0
   }
 </script>
 
@@ -58,7 +74,7 @@
   <div id="calc">
     <h2>Calculator :)</h2>
     <!-- value display -->
-    <div class="display">{{num}}</div>
+    <div class="display">{{nDisplayed}}</div>
     <!-- digit buttons -->
     <div id="digit-wrapper">
       <button v-for="i in Array(10).keys()" @click="addDigit(i)">{{i}}</button>
