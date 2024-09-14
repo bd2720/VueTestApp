@@ -2,19 +2,22 @@
 <script setup>
   import { ref, computed } from 'vue'
   // first operand
-  let n1 = ref(0)
+  const n1 = ref(0)
   // current operation
   var currOp = undefined
   // second operand
-  let n2 = ref(undefined)
+  const n2 = ref(undefined)
   // all operations
   const operations = ['+', '-', 'x', '÷']
 
   // whether entering n2 or not
   const second = ref(false)
+  // whether displaying result of a computation
+  var displayingRes = false
 
   // displayed number
   const nDisplayed = computed(() => {
+    // show n2 if it is required and exists
     if(second.value && n2.value != undefined) {
       return n2.value
     }
@@ -23,14 +26,24 @@
 
   // try to add digit to num
   function addDigit(i) {
-    if(second.value){
+    if(second.value){ // add to n2 if n2 required
       n2.value = (n2.value == undefined) ? i : 10*n2.value + i
-    } else {
-      n1.value = 10 * n1.value + i
+    } else { // add to n1
+      // if displaying computation result, overwrite
+      if(displayingRes){
+        n1.value = i
+        displayingRes = false
+      } else {
+        n1.value = 10 * n1.value + i
+      }
     }
   }
   // choose operation
   function chooseOp(op){
+    // evaluate previous if n2 exists
+    if(second.value && n2.value != undefined){
+      evaluate()
+    }
     // set operation
     currOp = op
     // now we need n2
@@ -38,10 +51,16 @@
     // set n2 value undefined
     n2.value = undefined
   }
-  // evaluate oldNum `op` num
+  // evaluate n1 `currOp` n2
   function evaluate(){
     // stop inputting n2
     second.value = false
+    // if n2 is blank, copy n1
+    if(n2.value == undefined){
+      n2.value = n1.value
+    }
+    // now displaying the result
+    displayingRes = true
     // evaluate based on operation
     switch(currOp){
       case '+':
@@ -57,15 +76,18 @@
         n1.value /= n2.value
         break
       default:
-        n1.value = 'Error'
+        // n1.value = n1.value
     }
   }
-  // reset num, keeping history (oldNum)
+  // keep n2 and currOp, clear n1
   function clear() {
+    n1.value = 0
   }
-  // reset n1 and n2
+  // reset n1, n2 and op
   function reset() {
-    n1.value = n2.value = 0
+    n1.value = 0
+    n2.value = undefined
+    currOp = undefined
   }
 </script>
 
@@ -89,8 +111,6 @@
       <button @click="clear">Clear</button>
       <button @click="reset">Reset</button>
     </div>
-    <!-- operation buttons-->
-    
   </div>
 </template>
 
