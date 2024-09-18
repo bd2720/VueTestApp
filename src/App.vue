@@ -7,8 +7,10 @@
   var currOp = undefined
   // second operand
   const n2 = ref(undefined)
-  // all operations
-  const operations = ['+', '-', 'x', '÷', '%', '&', '|', '^']
+  // all binary operations
+  const operations = ['+', '-', 'x', '÷', '%', '&', '|', '^', '**']
+  // all unary operations
+  const unaryOperations = ['±', '1/x']
 
   // whether entering n2 or not
   const second = ref(false)
@@ -62,6 +64,15 @@
     // set n2 value undefined
     n2.value = undefined
   }
+  // choose (and eval) unary operation
+  function chooseUnaryOp(op){
+    // perform on n2 if conditions met
+    if(second.value && n2.value != undefined){
+      n2.value = evaluateUnary(op, n2.value)
+    } else { // perform on n1
+      n1.value = evaluateUnary(op, n1.value)
+    }
+  }
   // evaluate n1 `currOp` n2
   function evaluate(){
     // stop inputting n2
@@ -98,8 +109,25 @@
       case '^':
         n1.value ^= n2.value
         break
+      case '**':
+        n1.value **= n2.value
+        break
       default:
         // n1.value = n1.value
+    }
+  }
+  // return new value of unary operation
+  function evaluateUnary(op, num){
+    // now displaying a result
+    displayingRes = true
+    // evaluate based on operation
+    switch(op){
+      case '±':
+        return -num
+      case '1/x':
+        return 1/num
+      default:
+        return num
     }
   }
   // keep n2 and currOp, clear n1
@@ -131,10 +159,14 @@
     <!-- operational buttons -->
     <div id="op-wrapper">
       <button v-for="op in operations" @click="chooseOp(op)">{{op}}</button>
-      <button @click="evaluate">=</button>
+    </div>
+    <!-- unary operational buttons -->
+    <div id="unary-wrapper">
+      <button v-for="op in unaryOperations" @click="chooseUnaryOp(op)">{{op}}</button>
     </div>
     <!-- functional buttons -->
     <div id="func-wrapper">
+      <button @click="evaluate">=</button>
       <button @click="clear">Clear</button>
       <button @click="reset">Reset</button>
     </div>
