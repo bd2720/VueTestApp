@@ -1,6 +1,16 @@
 <!-- JS goes here -->
 <script setup>
   import { ref, computed } from 'vue'
+  import Console from './Console.vue'
+
+  function fact(n){
+    if(!Number.isInteger(n) || n < 0) return NaN
+    let prod = 1
+    while(n > 0)
+      prod *= n--
+    return prod
+  }
+
   // first operand
   const n1 = ref(0)
   // current operation
@@ -10,7 +20,7 @@
   // all binary operations
   const operations = ['+', '-', 'x', '÷', '%', '&', '|', '^', '**']
   // all unary operations
-  const unaryOperations = ['±', '1/x']
+  const unaryOperations = ['±', '1/x', 'sq', 'sqrt', 'x!']
 
   // whether entering n2 or not
   const second = ref(false)
@@ -126,6 +136,12 @@
         return -num
       case '1/x':
         return 1/num
+      case 'sqrt':
+        return num **= 0.5
+      case 'sq':
+        return num **= 2
+      case 'x!':
+        return fact(num)
       default:
         return num
     }
@@ -175,6 +191,7 @@
       <button @click="changeBase">To {{baseStr}}</button>
     </div>
   </div>
+  <Console />
 </template>
 
 <style>
