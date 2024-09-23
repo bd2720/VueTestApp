@@ -6,15 +6,16 @@
   function fact(n){
     if(!Number.isInteger(n) || n < 0) return NaN
     let prod = 1
-    while(n > 0)
+    while(n > 0){
       prod *= n--
+    }
     return prod
   }
 
   // first operand
   const n1 = ref(0)
   // current operation
-  var currOp = undefined
+  const currOp = ref(undefined)
   // second operand
   const n2 = ref(undefined)
   // all binary operations
@@ -47,6 +48,9 @@
     return n1.value.toString(base.value)
   })
 
+  // number of operations performed
+  const opCount = ref(0)
+
   // try to add digit to num
   function addDigit(i) {
     if(second.value){ // add to n2 if n2 required
@@ -68,7 +72,7 @@
       evaluate()
     }
     // set operation
-    currOp = op
+    currOp.value = op
     // now we need n2
     second.value = true
     // set n2 value undefined
@@ -93,8 +97,10 @@
     }
     // now displaying the result
     displayingRes = true
+    // increment opCount
+    opCount.value++
     // evaluate based on operation
-    switch(currOp){
+    switch(currOp.value){
       case '+':
         n1.value += n2.value
         break
@@ -154,7 +160,7 @@
   function reset() {
     n1.value = 0
     n2.value = undefined
-    currOp = undefined
+    currOp.value = undefined
   }
   // toggle base (decimal or binary)
   function changeBase() {
@@ -191,7 +197,8 @@
       <button @click="changeBase">To {{baseStr}}</button>
     </div>
   </div>
-  <Console />
+  <!-- use props to pass internal state to child-->
+  <Console :num1="n1" :op="currOp" :num2="n2" :numOps="opCount" />
 </template>
 
 <style>
