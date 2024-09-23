@@ -50,6 +50,8 @@
 
   // number of operations performed
   const opCount = ref(0)
+  // needed to send to child
+  const oldN1 = ref(undefined)
 
   // try to add digit to num
   function addDigit(i) {
@@ -99,6 +101,8 @@
     displayingRes = true
     // increment opCount
     opCount.value++
+    // save old value of n1
+    oldN1.value = n1.value
     // evaluate based on operation
     switch(currOp.value){
       case '+':
@@ -161,6 +165,8 @@
     n1.value = 0
     n2.value = undefined
     currOp.value = undefined
+    // clear history
+    opCount.value = 0
   }
   // toggle base (decimal or binary)
   function changeBase() {
@@ -198,7 +204,7 @@
     </div>
   </div>
   <!-- use props to pass internal state to child-->
-  <Console :num1="n1" :op="currOp" :num2="n2" :numOps="opCount" />
+  <Console :num1="oldN1" :op="currOp" :num2="n2" :res="n1" :numOps="opCount" />
 </template>
 
 <style>

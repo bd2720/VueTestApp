@@ -5,14 +5,15 @@
     num1: Number,
     op: String,
     num2: Number,
+    res: Number,
     numOps: Number
   })
 
+  // stores num1, op, num2, res
   const history = ref([])
 
   // when opCount changes, either clear or add to history
-  /*
-  watch(numOps, (newNumOps) => {
+  watch(() => props.numOps, (newNumOps) => {
     // clear history if reset
     if(newNumOps == 0){
       history.value = []
@@ -20,12 +21,12 @@
     }
     // else, add current state
     history.value.push({
-      thisNum1: num1.value,
-      thisOp: op.value,
-      thisNum2: num2.value
+      thisNum1: props.num1,
+      thisOp: props.op,
+      thisNum2: props.num2,
+      thisRes: props.res
     })
   })
-  */
 
 </script>
 
@@ -34,8 +35,7 @@
     <h1>Console</h1>
     <div id="console">
       <ul>
-        <!--<li v-for="state in history">{{state.thisNum1}} {{state.thisOp}} {{state.thisNum2}} </li>
-      -->
+        <li v-for="state in history">{{state.thisNum1}} {{state.thisOp}} {{state.thisNum2}} = {{state.thisRes}}</li>
       </ul>
     </div>
   </div>
@@ -61,6 +61,7 @@
     border: 2px solid lightgray;
     border-radius: 5px;
     background: black;
+    min-height: 40px;
   }
 
   li {
