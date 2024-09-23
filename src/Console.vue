@@ -32,7 +32,7 @@
 
 <template>
   <div id="console-wrapper">
-    <h1>Console</h1>
+    <h1>History</h1>
     <div id="console">
       <ul>
         <li v-for="state in history">{{state.thisNum1}} {{state.thisOp}} {{state.thisNum2}} = {{state.thisRes}}</li>
@@ -62,6 +62,12 @@
     border-radius: 5px;
     background: black;
     min-height: 40px;
+    max-height: 210px;
+    /* for vertical scrolling */
+    overflow-y: scroll;
+    /* for snapping to list end */
+    display: flex;
+    flex-direction: column-reverse;
   }
 
   li {

@@ -181,25 +181,25 @@
     <!-- value display -->
     <div class="display">{{nDisplayed}}</div>
     <!-- digit buttons -->
-    <div id="digit-wrapper">
+    <div id="digit-wrapper" class="button-wrapper">
       <button v-for="i in digits" @click="addDigit(i)">{{i}}</button>
     </div>
     <!-- operational buttons -->
-    <div id="op-wrapper">
+    <div id="op-wrapper" class="button-wrapper">
       <button v-for="op in operations" @click="chooseOp(op)">{{op}}</button>
     </div>
     <!-- unary operational buttons -->
-    <div id="unary-wrapper">
+    <div id="unary-wrapper" class="button-wrapper">
       <button v-for="op in unaryOperations" @click="chooseUnaryOp(op)">{{op}}</button>
     </div>
     <!-- functional buttons -->
-    <div id="func-wrapper">
+    <div id="func-wrapper" class="button-wrapper">
       <button @click="evaluate">=</button>
       <button @click="clear">Clear</button>
       <button @click="reset">Reset</button>
     </div>
     <!-- special buttons -->
-    <div id="special-wrapper">
+    <div id="special-wrapper" class="button-wrapper">
       <button @click="changeBase">To {{baseStr}}</button>
     </div>
   </div>
@@ -213,11 +213,13 @@
     font-size: 64px;
     margin: 0;
   }
+  h2 {
+    margin-top: 20px;
+  }
   body {
     height: 100vh;
 
     display: flex;
-    align-items: center;
     justify-content: center;
 
     background: gainsboro;
@@ -233,10 +235,18 @@
     text-align: right;
 
     height: 72px;
-    min-width: 388px;
+    min-width: 100%;
     width: fit-content;
     background: white;
     border: 2px solid black;
     border-radius: 15px;
+    margin-top: 8px;
+  }
+
+  .button-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top: 8px;
   }
 </style>
