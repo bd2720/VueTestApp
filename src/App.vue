@@ -27,6 +27,8 @@
   const second = ref(false)
   // whether displaying result of a computation
   var displayingRes = false
+  // multiplier for new decimal digits
+  const decMultiplier = ref(undefined)
 
   // active base
   const base = ref(10)
@@ -40,12 +42,23 @@
   })
 
   // displayed number
+  /* TODO:
+    - round number to fit in display
+    - display trailing 0s in decimal mode
+  */
   const nDisplayed = computed(() => {
+    let displayStr = ""
     // show n2 if it is required and exists
     if(second.value && n2.value != undefined) {
-      return n2.value.toString(base.value)
+      displayStr = n2.value.toString(base.value)
+    } else {
+      displayStr = n1.value.toString(base.value)
     }
-    return n1.value.toString(base.value)
+    // show decimal point if just placed
+    if(decMultiplier.value == (1/base.value)){
+      displayStr += '.'
+    }
+    return displayStr
   })
 
   // number of operations performed
@@ -56,13 +69,23 @@
   // try to add digit to num
   function addDigit(i) {
     if(second.value){ // add to n2 if n2 required
-      n2.value = (n2.value == undefined) ? i : base.value * n2.value + i
+      // handle decimal mode
+      if(decMultiplier.value != undefined){
+        // n2 should not be undefined here
+        n2.value += i * decMultiplier.value
+        decMultiplier.value /= base.value
+      } else { // regular mode
+        n2.value = (n2.value == undefined) ? i : base.value * n2.value + i
+      }
     } else { // add to n1
       // if displaying computation result, overwrite
       if(displayingRes){
         n1.value = i
         displayingRes = false
-      } else {
+      } else if(decMultiplier.value < 1){ // handle decimal
+        n1.value += i * decMultiplier.value
+        decMultiplier.value /= base.value
+      } else { // regular
         n1.value = base.value * n1.value + i
       }
     }
@@ -79,9 +102,15 @@
     second.value = true
     // set n2 value undefined
     n2.value = undefined
+    // reset decimal place
+    decMultiplier.value = undefined
   }
   // choose (and eval) unary operation
   function chooseUnaryOp(op){
+    // displaying a result
+    displayingRes = true
+    // reset decimal place
+    decMultiplier.value = undefined
     // perform on n2 if conditions met
     if(second.value && n2.value != undefined){
       n2.value = evaluateUnary(op, n2.value)
@@ -99,8 +128,8 @@
     }
     // now displaying the result
     displayingRes = true
-    // increment opCount
-    opCount.value++
+    // reset decimal place
+    decMultiplier.value = undefined
     // save old value of n1
     oldN1.value = n1.value
     // evaluate based on operation
@@ -132,14 +161,18 @@
       case '**':
         n1.value **= n2.value
         break
-      default:
-        // n1.value = n1.value
+      default: // currOp undefined
+        return
     }
+    // increment opCount
+    opCount.value++
   }
   // return new value of unary operation
   function evaluateUnary(op, num){
     // now displaying a result
     displayingRes = true
+    // reset decimal place
+    decMultiplier.value = undefined
     // evaluate based on operation
     switch(op){
       case '±':
@@ -159,6 +192,10 @@
   // keep n2 and currOp, clear n1
   function clear() {
     n1.value = 0
+    // not displaying a result
+    displayingRes = false
+    // reset decimal place
+    decMultiplier.value = undefined
   }
   // reset n1, n2 and op
   function reset() {
@@ -167,6 +204,20 @@
     currOp.value = undefined
     // clear history
     opCount.value = 0
+    // not displaying a result
+    displayingRes = false
+    // reset decimal place
+    decMultiplier.value = undefined
+  }
+  // place decimal point
+  function placeDecimal() {
+    // return if decimal mult already initialized
+    if(decMultiplier.value != undefined) return
+    decMultiplier.value = 0.1
+    // make n2 0 if needed and undefined
+    if(second.value && n2.value == undefined){
+      n2.value = 0
+    }
   }
   // toggle base (decimal or binary)
   function changeBase() {
@@ -194,9 +245,10 @@
     </div>
     <!-- functional buttons -->
     <div id="func-wrapper" class="button-wrapper">
-      <button @click="evaluate">=</button>
+      <button @click="placeDecimal">.</button>
       <button @click="clear">Clear</button>
       <button @click="reset">Reset</button>
+      <button @click="evaluate">=</button>
     </div>
     <!-- special buttons -->
     <div id="special-wrapper" class="button-wrapper">
