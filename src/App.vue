@@ -5,6 +5,8 @@
 
   function fact(n){
     if(!Number.isInteger(n) || n < 0) return NaN
+    // set upper limit
+    if(n >= 200) return Infinity
     let prod = 1
     while(n > 0){
       prod *= n--
@@ -19,9 +21,11 @@
   // second operand
   const n2 = ref(undefined)
   // all binary operations
-  const operations = ['+', '-', 'x', '÷', '%', '&', '|', '^', '**']
+  const operations = ['+', '-', '*', '/', '%', '&', '|', '^', '**']
   // all unary operations
-  const unaryOperations = ['±', '1/x', 'sq', 'sqrt', 'x!']
+  const unaryOperations = ['±', '1/x', 'x!', 'sq', 'sqrt']
+  // constants
+  const constants = ['e', 'π', 'γ']
 
   // whether entering n2 or not
   const second = ref(false)
@@ -47,13 +51,15 @@
     - display trailing 0s in decimal mode
   */
   const nDisplayed = computed(() => {
-    let displayStr = ""
+    let displayStr = 0
     // show n2 if it is required and exists
     if(second.value && n2.value != undefined) {
-      displayStr = n2.value.toString(base.value)
+      displayStr = n2.value
     } else {
-      displayStr = n1.value.toString(base.value)
+      displayStr = n1.value
     }
+    // show in correct base (convert to string)
+    displayStr = displayStr.toString(base.value)
     // show decimal point if just placed
     if(decMultiplier.value == (1/base.value)){
       displayStr += '.'
@@ -69,8 +75,11 @@
   // try to add digit to num
   function addDigit(i) {
     if(second.value){ // add to n2 if n2 required
-      // handle decimal mode
-      if(decMultiplier.value != undefined){
+      // overwrite computational result
+      if(displayingRes){
+        n2.value = i
+        displayingRes = false
+      } else if(decMultiplier.value != undefined){ // handle decimal mode
         // n2 should not be undefined here
         n2.value += i * decMultiplier.value
         decMultiplier.value /= base.value
@@ -140,10 +149,10 @@
       case '-':
         n1.value -= n2.value
         break
-      case 'x':
+      case '*':
         n1.value *= n2.value
         break
-      case '÷':
+      case '/':
         n1.value /= n2.value
         break
       case '%':
@@ -211,6 +220,8 @@
   }
   // place decimal point
   function placeDecimal() {
+    // not displaying a result
+    displayingRes = false
     // return if decimal mult already initialized
     if(decMultiplier.value != undefined) return
     decMultiplier.value = 0.1
@@ -223,16 +234,41 @@
   function changeBase() {
     base.value = (base.value == 2) ? 10 : 2
   }
+  // load a constant into either n1 or n2
+  function loadConstant(c){
+    displayingRes = true
+    decMultiplier.value = undefined
+    // load constant value
+    switch(c){
+      case 'e':
+        c = Math.E
+        break
+      case 'π':
+        c = Math.PI
+        break
+      case 'γ':
+        c = 0.577215664901533
+        break
+      default:
+        c = 0
+    }
+    if(second.value){
+      n2.value = c
+    } else {
+      n1.value = c
+    }
+  }
 </script>
 
 <!-- HTML (body content) goes here -->
 <template>
   <div id="calc">
-    <h2>Calculator :)</h2>
+    <h2>Vue Calculator :)</h2>
     <!-- value display -->
     <div class="display">{{nDisplayed}}</div>
     <!-- digit buttons -->
     <div id="digit-wrapper" class="button-wrapper">
+      <button @click="placeDecimal">.</button>
       <button v-for="i in digits" @click="addDigit(i)">{{i}}</button>
     </div>
     <!-- operational buttons -->
@@ -245,13 +281,13 @@
     </div>
     <!-- functional buttons -->
     <div id="func-wrapper" class="button-wrapper">
-      <button @click="placeDecimal">.</button>
+      <button @click="evaluate">=</button>
       <button @click="clear">Clear</button>
       <button @click="reset">Reset</button>
-      <button @click="evaluate">=</button>
     </div>
     <!-- special buttons -->
     <div id="special-wrapper" class="button-wrapper">
+      <button v-for="c in constants" @click="loadConstant(c)">{{c}}</button>
       <button @click="changeBase">To {{baseStr}}</button>
     </div>
   </div>
@@ -266,6 +302,7 @@
     margin: 0;
   }
   h2 {
+    text-align: center;
     margin-top: 20px;
   }
   body {
@@ -287,12 +324,12 @@
     text-align: right;
 
     height: 72px;
-    min-width: 100%;
-    width: fit-content;
+    min-width: 6px;
     background: white;
     border: 2px solid black;
     border-radius: 15px;
     margin-top: 8px;
+    padding-right: 4px;
   }
 
   .button-wrapper {
