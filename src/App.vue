@@ -3,10 +3,11 @@
   import { ref, computed } from 'vue'
   import Console from './Console.vue'
 
+  // factorial of integer n >= 0
   function fact(n){
     if(!Number.isInteger(n) || n < 0) return NaN
     // set upper limit
-    if(n >= 200) return Infinity
+    if(n > 170) return Infinity
     let prod = 1
     while(n > 0){
       prod *= n--
@@ -21,11 +22,104 @@
   // second operand
   const n2 = ref(undefined)
   // all binary operations
-  const operations = ['+', '-', '*', '/', '%', '&', '|', '^', '**']
+  const operations = 
+  [
+    {
+      char: '+',
+      val: (x, y) => x + y,
+      desc: 'Addition'
+    },
+    {
+      char: '-',
+      val: (x, y) => x - y,
+      desc: 'Subtraction'
+    },
+    {
+      char: '*',
+      val: (x, y) => x * y,
+      desc: 'Multiplication'
+    },
+    {
+      char: '/',
+      val: (x, y) => x / y,
+      desc: 'Division'
+    },
+    {
+      char: '%',
+      val: (x, y) => x % y,
+      desc: 'Modulo (Remainder)'
+    },
+    {
+      char: '&',
+      val: (x, y) => x & y,
+      desc: 'Bitwise AND'
+    },
+    {
+      char: '|',
+      val: (x, y) => x | y,
+      desc: 'Bitwise OR'
+    },
+    {
+      char: '^',
+      val: (x, y) => x ^ y,
+      desc: 'Bitwise XOR'
+    },
+    {
+      char: '**',
+      val: (x, y) => x ** y,
+      desc: 'Exponentiation'
+    }
+  ]
+
   // all unary operations
-  const unaryOperations = ['±', '1/x', 'x!', 'sq', 'sqrt']
-  // constants
-  const constants = ['e', 'π', 'γ']
+  const unaryOperations = 
+  [
+    {
+      char: '±',
+      val: (n) => -n,
+      desc: 'Negation'
+    },
+    {
+      char: '1/x',
+      val: (n) => 1/n,
+      desc: 'Reciprocal'
+    },
+    {
+      char: 'x!',
+      val: fact,
+      desc: 'Factorial'
+    },
+    {
+      char: 'sq',
+      val: (n) => n*n,
+      desc: 'Square'
+    },
+    {
+      char: 'sqrt',
+      val: Math.sqrt,
+      desc: 'Square root'
+    },
+  ]
+
+  // mathematical constants
+  const constants = 
+  [
+    {
+      char: 'e',
+      val: Math.E,
+      desc: `Euler's number`
+    },
+    {
+      char: 'π',
+      val: Math.PI,
+      desc: 'Pi'
+    },
+    {
+      char: 'γ',
+      val: 0.577215664901533,
+      desc: 'Euler-Mascheroni constant'
+    }
+  ]
 
   // whether entering n2 or not
   const second = ref(false)
@@ -46,10 +140,6 @@
   })
 
   // displayed number
-  /* TODO:
-    - round number to fit in display (IN PROGRESS)
-    - display trailing 0s in decimal mode (DONE)
-  */
   const nDisplayed = computed(() => {
     let displayStr = 0
     // show n2 if it is required and exists
@@ -61,10 +151,13 @@
     // show correct number of decimals if inputting decimal
     if(decMultiplier.value){
       displayStr = displayStr.toFixed(Math.min(15,-1-Math.log10(decMultiplier.value)))
-    } else {
-      // round to 15 decimal places, to fit in display
-      displayStr = Math.round(displayStr * 1e15) / 1e15
-      //displayStr = Number(displayStr.toFixed(15))
+    } else if(Math.abs(displayStr) > 1e15){ // very large number
+      displayStr = Number.parseFloat(displayStr).toExponential(9)
+    } else if(Math.abs(displayStr) < 1/1e15 && displayStr){
+      displayStr = Number.parseFloat(displayStr).toExponential(9)
+    } else { // general case
+      // round to 14/15 decimal places, to fit in display
+      displayStr = Number(displayStr.toFixed(14))
     }
     // show in correct base (convert to string)
     displayStr = displayStr.toString(base.value)
@@ -108,13 +201,13 @@
     }
   }
   // choose operation
-  function chooseOp(op){
+  function chooseOp(opObj){
     // evaluate previous if n2 exists
     if(second.value && n2.value != undefined){
       evaluate()
     }
     // set operation
-    currOp.value = op
+    currOp.value = opObj
     // now we need n2
     second.value = true
     // set n2 value undefined
@@ -123,16 +216,16 @@
     decMultiplier.value = undefined
   }
   // choose (and eval) unary operation
-  function chooseUnaryOp(op){
+  function chooseUnaryOp(opObj){
     // displaying a result
     displayingRes = true
     // reset decimal place
     decMultiplier.value = undefined
     // perform on n2 if conditions met
     if(second.value && n2.value != undefined){
-      n2.value = evaluateUnary(op, n2.value)
+      n2.value = evaluateUnary(opObj, n2.value)
     } else { // perform on n1
-      n1.value = evaluateUnary(op, n1.value)
+      n1.value = evaluateUnary(opObj, n1.value)
     }
   }
   // evaluate n1 `currOp` n2
@@ -150,61 +243,18 @@
     // save old value of n1
     oldN1.value = n1.value
     // evaluate based on operation
-    switch(currOp.value){
-      case '+':
-        n1.value += n2.value
-        break
-      case '-':
-        n1.value -= n2.value
-        break
-      case '*':
-        n1.value *= n2.value
-        break
-      case '/':
-        n1.value /= n2.value
-        break
-      case '%':
-        n1.value %= n2.value
-        break
-      case '&':
-        n1.value &= n2.value
-        break
-      case '|':
-        n1.value |= n2.value
-        break
-      case '^':
-        n1.value ^= n2.value
-        break
-      case '**':
-        n1.value **= n2.value
-        break
-      default: // currOp undefined
-        return
-    }
+    n1.value = currOp.value['val'](n1.value, n2.value)
     // increment opCount
     opCount.value++
   }
   // return new value of unary operation
-  function evaluateUnary(op, num){
+  function evaluateUnary(opObj, num){
     // now displaying a result
     displayingRes = true
     // reset decimal place
     decMultiplier.value = undefined
     // evaluate based on operation
-    switch(op){
-      case '±':
-        return -num
-      case '1/x':
-        return 1/num
-      case 'sqrt':
-        return num **= 0.5
-      case 'sq':
-        return num **= 2
-      case 'x!':
-        return fact(num)
-      default:
-        return num
-    }
+    return opObj['val'](num)
   }
   // keep n2 and currOp, clear n1
   function clear() {
@@ -243,23 +293,11 @@
     base.value = (base.value == 2) ? 10 : 2
   }
   // load a constant into either n1 or n2
-  function loadConstant(c){
+  function loadConstant(cObj){
     displayingRes = true
     decMultiplier.value = undefined
     // load constant value
-    switch(c){
-      case 'e':
-        c = Math.E
-        break
-      case 'π':
-        c = Math.PI
-        break
-      case 'γ':
-        c = 0.577215664901533
-        break
-      default:
-        c = 0
-    }
+    let c = cObj['val']
     if(second.value){
       n2.value = c
     } else {
@@ -281,11 +319,11 @@
     </div>
     <!-- operational buttons -->
     <div id="op-wrapper" class="button-wrapper">
-      <button v-for="op in operations" @click="chooseOp(op)">{{op}}</button>
+      <button v-for="opObj in operations" @click="chooseOp(opObj)" :title="opObj['desc']">{{opObj['char']}}</button>
     </div>
     <!-- unary operational buttons -->
     <div id="unary-wrapper" class="button-wrapper">
-      <button v-for="op in unaryOperations" @click="chooseUnaryOp(op)">{{op}}</button>
+      <button v-for="opObj in unaryOperations" @click="chooseUnaryOp(opObj)" :title="opObj['desc']">{{opObj['char']}}</button>
     </div>
     <!-- functional buttons -->
     <div id="func-wrapper" class="button-wrapper">
@@ -295,12 +333,12 @@
     </div>
     <!-- special buttons -->
     <div id="special-wrapper" class="button-wrapper">
-      <button v-for="c in constants" @click="loadConstant(c)">{{c}}</button>
+      <button v-for="cObj in constants" @click="loadConstant(cObj)" :title="cObj['desc']">{{cObj['char']}}</button>
       <button @click="changeBase">To {{baseStr}}</button>
     </div>
   </div>
   <!-- use props to pass internal state to child-->
-  <Console :num1="oldN1" :op="currOp" :num2="n2" :res="n1" :numOps="opCount" />
+  <Console :num1="oldN1" :opObj="currOp" :num2="n2" :res="n1" :numOps="opCount" />
 </template>
 
 <style>

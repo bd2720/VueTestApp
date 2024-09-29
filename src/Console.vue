@@ -3,7 +3,7 @@
 
   const props = defineProps({
     num1: Number,
-    op: String,
+    opObj: Object,
     num2: Number,
     res: Number,
     numOps: Number
@@ -22,7 +22,7 @@
     // else, add current state
     history.value.push({
       thisNum1: props.num1,
-      thisOp: props.op,
+      thisOp: props.opObj['char'],
       thisNum2: props.num2,
       thisRes: props.res
     })
@@ -71,8 +71,6 @@
   }
 
   li {
-    /* allow overflow */
-    overflow-wrap: break-word;
     color: #00ff00;
     list-style-type: none;
     font-size: 16px;
