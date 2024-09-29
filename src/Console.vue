@@ -71,6 +71,8 @@
   }
 
   li {
+    /* allow overflow */
+    overflow-wrap: break-word;
     color: #00ff00;
     list-style-type: none;
     font-size: 16px;

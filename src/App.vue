@@ -47,8 +47,8 @@
 
   // displayed number
   /* TODO:
-    - round number to fit in display
-    - display trailing 0s in decimal mode
+    - round number to fit in display (IN PROGRESS)
+    - display trailing 0s in decimal mode (DONE)
   */
   const nDisplayed = computed(() => {
     let displayStr = 0
@@ -57,6 +57,14 @@
       displayStr = n2.value
     } else {
       displayStr = n1.value
+    }
+    // show correct number of decimals if inputting decimal
+    if(decMultiplier.value){
+      displayStr = displayStr.toFixed(Math.min(15,-1-Math.log10(decMultiplier.value)))
+    } else {
+      // round to 15 decimal places, to fit in display
+      displayStr = Math.round(displayStr * 1e15) / 1e15
+      //displayStr = Number(displayStr.toFixed(15))
     }
     // show in correct base (convert to string)
     displayStr = displayStr.toString(base.value)
@@ -324,7 +332,7 @@
     text-align: right;
 
     height: 72px;
-    min-width: 6px;
+    width: 602px;
     background: white;
     border: 2px solid black;
     border-radius: 15px;
