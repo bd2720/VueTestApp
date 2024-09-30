@@ -157,7 +157,7 @@
       displayStr = Number.parseFloat(displayStr).toExponential(9)
     } else { // general case
       // round to 14/15 decimal places, to fit in display
-      displayStr = Number(displayStr.toFixed(14))
+      displayStr = Number(displayStr.toPrecision(15))
     }
     // show in correct base (convert to string)
     displayStr = displayStr.toString(base.value)
@@ -314,7 +314,7 @@
     <div class="display">{{nDisplayed}}</div>
     <!-- digit buttons -->
     <div id="digit-wrapper" class="button-wrapper">
-      <button @click="placeDecimal">.</button>
+      <button @click="placeDecimal" title="Place decimal point">.</button>
       <button v-for="i in digits" @click="addDigit(i)">{{i}}</button>
     </div>
     <!-- operational buttons -->
@@ -327,18 +327,20 @@
     </div>
     <!-- functional buttons -->
     <div id="func-wrapper" class="button-wrapper">
-      <button @click="evaluate">=</button>
-      <button @click="clear">Clear</button>
-      <button @click="reset">Reset</button>
+      <button @click="evaluate" title="Evaluate">=</button>
+      <button @click="clear" title="Clear display, keeping memory">Clear</button>
+      <button @click="reset" title="Reset display and memory">Reset</button>
     </div>
     <!-- special buttons -->
     <div id="special-wrapper" class="button-wrapper">
       <button v-for="cObj in constants" @click="loadConstant(cObj)" :title="cObj['desc']">{{cObj['char']}}</button>
-      <button @click="changeBase">To {{baseStr}}</button>
+      <button @click="changeBase" title="Change base">To {{baseStr}}</button>
     </div>
   </div>
   <!-- use props to pass internal state to child-->
-  <Console :num1="oldN1" :opObj="currOp" :num2="n2" :res="n1" :numOps="opCount" />
+  <div class="console-wrapper">
+    <Console :num1="oldN1" :opObj="currOp" :num2="n2" :res="n1" :numOps="opCount" />
+  </div>
 </template>
 
 <style>
@@ -353,11 +355,16 @@
   }
   body {
     height: 100vh;
-
+    width: 100vw;
     display: flex;
     justify-content: center;
 
     background: gainsboro;
+  }
+
+  #calc {
+    /* prevent resizing */
+    max-width: 100%;
   }
 
   button {
@@ -383,5 +390,9 @@
     flex-direction: row;
     justify-content: space-evenly;
     margin-top: 8px;
+  }
+
+  .console-wrapper {
+    max-width: 610px;
   }
 </style>

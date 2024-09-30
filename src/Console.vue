@@ -68,6 +68,10 @@
     /* for snapping to list end */
     display: flex;
     flex-direction: column-reverse;
+    /* for horizontal scrolling */
+    white-space: nowrap;
+    overflow-x: auto;
+    width: 100%;
   }
 
   li {
