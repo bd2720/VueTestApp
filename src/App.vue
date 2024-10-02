@@ -15,6 +15,21 @@
     return prod
   }
 
+  // find greatest common denominator of two integers
+  function gcd(x, y){
+    // x and y must be nonnegative integers
+    if(!Number.isInteger(x) || x < 0 || !Number.isInteger(y) || y < 0){
+      return NaN
+    }
+    let r_gcd = function(xx, yy) {
+      if(yy == 0){
+        return xx
+      }
+      return r_gcd(yy, xx % yy)
+    }
+    return r_gcd(x, y)
+  }
+
   // first operand
   const n1 = ref(0)
   // current operation
@@ -68,6 +83,11 @@
       char: '**',
       val: (x, y) => x ** y,
       desc: 'Exponentiation'
+    },
+    {
+      char: 'gcd',
+      val: gcd,
+      desc: 'Greatest common denominator'
     }
   ]
 
@@ -98,6 +118,56 @@
       char: 'sqrt',
       val: Math.sqrt,
       desc: 'Square root'
+    },
+    {
+      char: 'cb',
+      val: (n) => n*n*n,
+      desc: 'Cube'
+    },
+    {
+      char: 'cbrt',
+      val: (n) => n ** (1/3),
+      desc: 'Cube root'
+    },
+    {
+      char: 'log',
+      val: Math.log10,
+      desc: 'Logarithm, base 10'
+    },
+    {
+      char: 'ln',
+      val: Math.log,
+      desc: 'Natural logarithm'
+    },
+    {
+      char: 'sin',
+      val: Math.sin,
+      desc: 'Sine'
+    },
+    {
+      char: 'cos',
+      val: Math.cos,
+      desc: 'Cosine'
+    },
+    {
+      char: 'tan',
+      val: Math.tan,
+      desc: 'Tangent'
+    },
+    {
+      char: 'asin',
+      val: Math.asin,
+      desc: 'Arcsine'
+    },
+    {
+      char: 'acos',
+      val: Math.acos,
+      desc: 'Arccosine'
+    },
+    {
+      char: 'atan',
+      val: Math.atan,
+      desc: 'Arctangent'
     },
   ]
 
@@ -365,6 +435,7 @@
   #calc {
     /* prevent resizing */
     max-width: 100%;
+    width: 800px;
   }
 
   button {
@@ -377,7 +448,6 @@
     text-align: right;
 
     height: 72px;
-    width: 602px;
     background: white;
     border: 2px solid black;
     border-radius: 15px;
@@ -393,6 +463,12 @@
   }
 
   .console-wrapper {
-    max-width: 610px;
+    max-width: 808px;
+  }
+
+  #unary-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 </style>
