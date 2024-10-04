@@ -126,7 +126,7 @@
     },
     {
       char: 'cbrt',
-      val: (n) => n ** (1/3),
+      val: Math.cbrt,
       desc: 'Cube root'
     },
     {
